@@ -3,7 +3,7 @@
 
 var esteid = require('./esteid.js')
 var apdu = require('./apdu.js')
-var pcsc = require('./node-pcsc-silent.js')
+var pcsc = require('./node-pcsc.js')
 
 function pem (b) {
   return '-----BEGIN CERTIFICATE-----\n' + b.toString('base64') + '\n-----END CERTIFICATE-----'

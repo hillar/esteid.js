@@ -28,7 +28,7 @@
 
   // construct
   var esteid = function () {
-    console.log('EstEID v' + VERSION)
+    console.error('EstEID v' + VERSION)
     // Fields to be exported
     var fields = {}
 
@@ -52,14 +52,14 @@
                 return apdu.check(transmit(Buffer.from([0x00, 0xB2, item + 1, 0x04, 0x00]))).then(function (result) {
                   counters[item] = result[5]
                 }).catch(function (err) {
-                  console.log('Reading counters failed', err)
+                  console.error('Reading counters failed', err)
                   return reject(err)
                 })
               })
             }, Promise.resolve()).then(function () {
               if (counters.length === 1) { resolve(counters[0]) } else { resolve(counters) }
             }, function (err) {
-              console.log('records failed')
+              console.error('records failed')
               reject(err)
             })
           }).catch(function (err) {
@@ -107,7 +107,7 @@
                   // FIXME: latin1 is not correct, must be Windows-1257
                   personaldata[item] = recordvalue.length === 1 && recordvalue[0] === 0x00 ? '' : recordvalue.toString('latin1').trim()
                 }).catch(function (err) {
-                  console.log('Reading persodata failed', err)
+                  console.error('Reading persodata failed', err)
                   return reject(err)
                 })
               })
@@ -168,7 +168,7 @@
                 return cert.slice(0, cut + 1)
               } else { return readfrom(offset + chunk.length, total) }
             }, function (reason) {
-              console.log('READ BINARY failed', reason)
+              console.error('READ BINARY failed', reason)
               throw reason
             })
           }
@@ -199,7 +199,7 @@
             return apdu.data(response)
           }
         }).catch(function (reason) {
-          console.log('Authentication failed: ', reason)
+          console.error('Authentication failed: ', reason)
           throw reason
         })
       }
@@ -220,7 +220,7 @@
           // resolve to signature
           return apdu.data(response)
         }).catch(function (reason) {
-          console.log('Signing failed: ', reason)
+          console.error('Signing failed: ', reason)
           throw reason
         })
       }
@@ -240,7 +240,7 @@
             apdu.check(transmit(cmd)).then(function (r) {
               if (chunks.length === 0) { return resolve(apdu.data(r)) } else { return decr() }
             }).catch(function (reason) {
-              console.log('Decryption failed')
+              console.error('Decryption failed')
               reject(reason)
             })
           }

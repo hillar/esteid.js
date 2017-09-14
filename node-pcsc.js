@@ -11,13 +11,13 @@ function transmit (reader, protocol) {
 
   return function (apdu) {
     return new Promise(function (resolve, reject) {
-      if (trace) { console.log('SEND (%s): %s', proto, apdu.toString('hex')) }
+      if (trace) { console.error('SEND (%s): %s', proto, apdu.toString('hex')) }
       reader.transmit(apdu, 4096, protocol, function (err, data) {
         if (err) {
-          if (trace) { console.log('RECV: ' + err.message) }
+          if (trace) { console.error('RECV: ' + err.message) }
           return reject(new Error('Transmit failed: ' + err.message))
         } else {
-          if (trace) { console.log('RECV: ' + data.toString('hex')) }
+          if (trace) { console.error('RECV: ' + data.toString('hex')) }
           return resolve(data)
         }
       })
@@ -28,7 +28,7 @@ function transmit (reader, protocol) {
 // Finds a card with a ATR as in the list, then
 // runs the application-promise generator
 function run (app, atrs) {
-  console.log('Please connect a card reader and insert a card')
+  console.error('Please connect a card reader and insert a card')
   // If a single ATR
   if (typeof atrs === 'string') {
     atrs = [atrs]
@@ -61,39 +61,39 @@ function run (app, atrs) {
 
     // Handle errors
     reader.on('error', function (err) {
-      console.log('Error(', this.name, '):', err.message)
+      console.error('Error(', this.name, '):', err.message)
     })
 
     var change = 0
-    console.log('READER ', reader.name)
+    console.error('READER ', reader.name)
 
     // Query status of reader
     reader.on('status', function (status) {
       change = change ^ status.state
-      if (trace) { console.log(pstate(status.state)) }
+      if (trace) { console.error(pstate(status.state)) }
 
       // If card is present
       if ((change & this.SCARD_STATE_PRESENT) && (status.state & this.SCARD_STATE_CHANGED)) {
-        console.log('CARD ' + reader.name)
+        console.error('CARD ' + reader.name)
         for (var atr in atrs) {
           if (Buffer.from(atrs[atr], 'hex').equals(status.atr)) {
-            console.log('Card in %s matches (%s)!', reader.name, status.atr.toString('hex'))
+            console.error('Card in %s matches (%s)!', reader.name, status.atr.toString('hex'))
           // Connect to card.
             reader.connect({
               share_mode: this.SCARD_SHARE_EXCLUSIVE
               // protocol: this.SCARD_PROTOCOL_T1
             }, function (err, protocol) {
               if (err) {
-                console.log(err)
+                console.error(err)
               } else {
                 reader.connected = true
                 app(transmit(reader, protocol)).then(() => {
                   reader.disconnect(() => {
-                    console.log('Done, reader disconnected')
+                    console.error('Done, reader disconnected')
                     process.exit(0)
                   })
                 }).catch((err) => {
-                  console.log('Application failed', err)
+                  console.error('Application failed', err)
                   process.exit(1)
                 })
               }
@@ -101,11 +101,11 @@ function run (app, atrs) {
           }
         }
       } else if (status.state & this.SCARD_STATE_EMPTY && status.state & this.SCARD_STATE_CHANGED) {
-        console.log('EMPTY ' + reader.name)
+        console.error('EMPTY ' + reader.name)
         if (reader.connected) {
           reader.disconnect(function (err) {
             if (err) {
-              console.log('could not disconnect', err)
+              console.error('could not disconnect', err)
             }
           })
         }
@@ -114,7 +114,7 @@ function run (app, atrs) {
   })
 
   pcsc.on('error', function (err) {
-    console.log('PCSC error', err.message)
+    console.error('PCSC error', err.message)
   })
 }
 
